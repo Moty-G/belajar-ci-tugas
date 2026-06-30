@@ -216,4 +216,42 @@ class TransaksiController extends BaseController
         return redirect()->to(base_url());
     }
 
+    public function history()
+    {
+        $username = session()->get('username'); 
+    
+        $transactions = $this->transactionModel->where('username', $username)->findAll();
+        $transactionIds = array_column($transactions, 'id');
+
+        $products = $this->transactionDetailModel->getProductsByTransactionIds($transactionIds);
+
+        $data = [
+            'username'      => $username,
+            'transactions'  => $transactions,
+            'products'      => $products
+        ]; 
+
+        return view('v_history', $data);
+    }
+
+    public function getProductsByTransactionIds(array $transactionIds)
+    {
+        if (empty($transactionIds)) {
+            return [];
+        }
+
+        $details = $this->select('transaction_detail.*, product.nama, product.harga, product.foto')
+            ->join('product', 'transaction_detail.product_id = product.id')
+            ->whereIn('transaction_id', $transactionIds)
+            ->findAll();
+
+        $products = [];
+
+        foreach ($details as $detail) {
+            $products[$detail['transaction_id']][] = $detail;
+        }
+
+        return $products;
+    }
+
 }

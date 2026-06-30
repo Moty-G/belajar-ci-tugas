@@ -26,18 +26,25 @@
           <i class="bi bi-card-list"></i>
           <span>Product</span>
         </a>
-      </li><!-- End Dashboard Nav -->
+      </li><!-- End Produk Nav -->
       
       <?php
       }
       ?>
 
       <li class="nav-item">
+          <a class="nav-link <?php echo (uri_string() == 'history') ? "" : "collapsed" ?>" href="history">
+              <i class="bi bi-person"></i>
+              <span>History</span>
+          </a>
+      </li><!-- End History Nav -->
+
+      <li class="nav-item">
         <a class="nav-link <?php echo (uri_string() == 'profile') ? "" : "collapsed" ?>" href="profile">
           <i class="bi bi-person-fill"></i>
           <span>Profile</span>
         </a>
-      </li><!-- End Dashboard Nav -->
+      </li><!-- End Profile Nav -->
 
     </ul>
 
