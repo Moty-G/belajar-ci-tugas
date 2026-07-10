@@ -19,6 +19,15 @@
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
 
+        <?php if (session()->get('active_discount') !== null) : ?>
+        <li class="nav-item">
+          <span class="badge bg-success fs-6 me-2">
+            <i class="bi bi-tag-fill"></i>
+            Diskon Hari Ini: <?= number_to_currency(session()->get('active_discount'), 'IDR') ?> / item
+          </span>
+        </li>
+        <?php endif; ?>
+
         <li class="nav-item d-block d-lg-none">
           <a class="nav-link nav-icon search-bar-toggle " href="#">
             <i class="bi bi-search"></i>
