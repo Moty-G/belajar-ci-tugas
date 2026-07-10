@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\models\ProductModel;
 use Dompdf\Dompdf;
 
+
 class ProdukController extends BaseController
 {
     protected $productModel; 

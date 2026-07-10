@@ -234,24 +234,5 @@ class TransaksiController extends BaseController
         return view('v_history', $data);
     }
 
-    public function getProductsByTransactionIds(array $transactionIds)
-    {
-        if (empty($transactionIds)) {
-            return [];
-        }
-
-        $details = $this->select('transaction_detail.*, product.nama, product.harga, product.foto')
-            ->join('product', 'transaction_detail.product_id = product.id')
-            ->whereIn('transaction_id', $transactionIds)
-            ->findAll();
-
-        $products = [];
-
-        foreach ($details as $detail) {
-            $products[$detail['transaction_id']][] = $detail;
-        }
-
-        return $products;
-    }
 
 }
