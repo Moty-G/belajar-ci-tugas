@@ -26,15 +26,26 @@ if (session()->getFlashData('success')) {
     <tbody>
         <?php
         $i = 1;
+        $totalDiskon = 0;
         if (!empty($items)) :
             foreach ($items as $index => $item) :
+                $hargaSetelahDiskon = ($active_discount !== null) ? max(0, $item['price'] - $active_discount) : $item['price'];
+                $subtotalItem = $hargaSetelahDiskon * $item['qty'];
+                $totalDiskon += $subtotalItem;
         ?>
                 <tr>
                     <td><?php echo $item['name'] ?></td>
                     <td><img src="<?php echo base_url() . "img/" . $item['options']['foto'] ?>" width="100px"></td>
-                    <td><?php echo number_to_currency($item['price'], 'IDR') ?></td> 
+                    <td>
+                        <?php if ($active_discount !== null) : ?>
+                            <span class="text-decoration-line-through text-muted"><?= number_to_currency($item['price'], 'IDR') ?></span><br>
+                            <span class="text-success fw-bold"><?= number_to_currency($hargaSetelahDiskon, 'IDR') ?></span>
+                        <?php else : ?>
+                            <?php echo number_to_currency($item['price'], 'IDR') ?>
+                        <?php endif; ?>
+                    </td>
                     <td><input type="number" min="1" name="qty<?php echo $i++ ?>" class="form-control" value="<?php echo $item['qty'] ?>"></td>
-                    <td><?php echo number_to_currency($item['subtotal'], 'IDR') ?></td>
+                    <td><?= number_to_currency($subtotalItem, 'IDR') ?></td>
                     <td>
                         <a href="<?php echo base_url('keranjang/delete/' . $item['rowid'] . '') ?>" class="btn btn-danger"><i class="bi bi-trash"></i></a>
                     </td>
@@ -47,7 +58,7 @@ if (session()->getFlashData('success')) {
 </table> 
 
 <div class="alert alert-info">
-    <?php echo "Total = " . number_to_currency($total, 'IDR') ?>
+    <?php echo "Total = " . number_to_currency($totalDiskon, 'IDR') ?>
 </div>
 
 <button type="submit" class="btn btn-primary">Perbarui Keranjang</button>

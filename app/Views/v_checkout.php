@@ -29,7 +29,7 @@
             <?= form_dropdown('kelurahan', [], '', ['id' => 'kelurahan', 'class' => 'form-control']) ?>
         </div>
         <div class="col-12"> 
-            <?= form_label('Layanan', 'layanan', ['class' => 'form-label']) ?> 
+            <?= form_label('Layanan', 'layanan', ['class' => 'form-label']) ?>
             <strong>select layanan</strong>
             <?= form_dropdown('layanan', [], '', ['id' => 'layanan', 'class' => 'form-control']) ?>
         </div>
@@ -60,15 +60,26 @@
         </tr>
     </thead>
     <tbody>
-        <?php 
+        <?php
+        $subtotalDiskon = 0;
         if (!empty($items)) :
             foreach ($items as $index => $item) :
+                $hargaSetelahDiskon = ($active_discount !== null) ? max(0, $item['price'] - $active_discount) : $item['price'];
+                $subtotalItem = $hargaSetelahDiskon * $item['qty'];
+                $subtotalDiskon += $subtotalItem;
         ?>
                 <tr>
                     <td><?= $item['name'] ?></td>
-                    <td><?= number_to_currency($item['price'], 'IDR') ?></td>
+                    <td>
+                        <?php if ($active_discount !== null) : ?>
+                            <span class="text-decoration-line-through text-muted"><?= number_to_currency($item['price'], 'IDR') ?></span><br>
+                            <span class="text-success fw-bold"><?= number_to_currency($hargaSetelahDiskon, 'IDR') ?></span>
+                        <?php else : ?>
+                            <?= number_to_currency($item['price'], 'IDR') ?>
+                        <?php endif; ?>
+                    </td>
                     <td><?= $item['qty'] ?></td>
-                    <td><?= number_to_currency($item['price'] * $item['qty'], 'IDR') ?></td>
+                    <td><?= number_to_currency($subtotalItem, 'IDR') ?></td>
                 </tr>
         <?php
             endforeach;
@@ -77,12 +88,12 @@
         <tr>
             <td colspan="2"></td>
             <td>Subtotal</td>
-            <td><?= number_to_currency($total, 'IDR') ?></td>
+            <td><?= number_to_currency($subtotalDiskon, 'IDR') ?></td>
         </tr>
         <tr>
             <td colspan="2"></td>
             <td>Total</td>
-            <td><span id="total"><?= number_to_currency($total, 'IDR') ?></span></td>
+            <td><span id="total"><?= number_to_currency($subtotalDiskon, 'IDR') ?></span></td>
         </tr>
     </tbody>
     </table>
@@ -96,7 +107,7 @@
 <script>
 $(document).ready(function() {
     let ongkir = 0;
-    let subtotal = <?= $total ?>;
+    let subtotal = <?= $subtotalDiskon ?>;
     hitungTotal();
 
     function hitungTotal() {

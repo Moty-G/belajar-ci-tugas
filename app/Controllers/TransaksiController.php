@@ -7,26 +7,39 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Services\RajaOngkirService;
 use App\Models\TransactionModel;
 use App\Models\TransactionDetailModel;
+use App\Models\DiscountModel;
 
 class TransaksiController extends BaseController
 {
     protected $cart;
     protected $transactionModel;
     protected $transactionDetailModel;
+    protected $discountModel;
 
     public function __construct()
     {
         helper(['number', 'form']);
         $this->cart = service('cart');
         $this->transactionModel = new TransactionModel();
-        $this->transactionDetailModel = new TransactionDetailModel(); 
+        $this->transactionDetailModel = new TransactionDetailModel();
+        $this->discountModel = new DiscountModel();
+    }
+
+    private function getActiveDiscount(): float
+    {
+        $today = $this->discountModel->getTodayDiscount();
+        return $today ? (float) $today['nominal'] : 0;
     }
 
     public function index()
-    {  
+    {
+        $activeDiscount = $this->getActiveDiscount();
+        session()->set('active_discount', $activeDiscount > 0 ? $activeDiscount : null);
+
         $data = [
-            'items' => $this->cart->contents(),
-            'total' => $this->cart->total() 
+            'items'          => $this->cart->contents(),
+            'total'          => $this->cart->total(),
+            'active_discount' => $activeDiscount > 0 ? $activeDiscount : null,
         ];
 
         return view('v_keranjang', $data);
@@ -98,10 +111,24 @@ class TransaksiController extends BaseController
     }
 
     public function checkout()
-    {  
+    {
+        $activeDiscount = $this->getActiveDiscount();
+        session()->set('active_discount', $activeDiscount > 0 ? $activeDiscount : null);
+
+        $items = $this->cart->contents();
+
+        // Hitung subtotal berdasarkan harga setelah diskon
+        $subtotalDiskon = 0;
+        foreach ($items as $item) {
+            $hargaSetelahDiskon = max(0, $item['price'] - $activeDiscount);
+            $subtotalDiskon += $hargaSetelahDiskon * $item['qty'];
+        }
+
         $data = [
-            'items' => $this->cart->contents(),
-            'total' => $this->cart->total() 
+            'items'          => $items,
+            'total'          => $subtotalDiskon,
+            'active_discount' => $activeDiscount > 0 ? $activeDiscount : null,
+            'subtotalDiskon' => $subtotalDiskon,
         ];
 
         return view('v_checkout', $data);
@@ -168,12 +195,15 @@ class TransaksiController extends BaseController
             return redirect()->back();
         }
 
+        $activeDiscount = $this->getActiveDiscount();
+
         $db = \Config\Database::connect();
         $db->transStart(); 
 
         $subtotal = 0;
         foreach ($cartItems as $item) {
-            $subtotal += $item['qty'] * $item['price'];
+            $hargaSetelahDiskon = max(0, $item['price'] - $activeDiscount);
+            $subtotal += $hargaSetelahDiskon * $item['qty'];
         }
 
         $ongkir = (int) $this->request->getPost('ongkir');
@@ -194,14 +224,15 @@ class TransaksiController extends BaseController
 
         $transactionId = $this->transactionModel->getInsertID();
 
-        // insert transaction detail
+        // insert transaction detail (with discount applied)
         foreach ($cartItems as $item) {
+            $hargaSetelahDiskon = max(0, $item['price'] - $activeDiscount);
             $this->transactionDetailModel->insert([
                 'transaction_id' => $transactionId,
                 'product_id'     => $item['id'],
                 'jumlah'         => $item['qty'],
-                'diskon'         => 0,
-                'subtotal_harga' => $item['qty'] * $item['price'] 
+                'diskon'         => $activeDiscount,
+                'subtotal_harga' => $hargaSetelahDiskon * $item['qty'],
             ]);
         }
 
@@ -211,7 +242,7 @@ class TransaksiController extends BaseController
             return redirect()->back()->with('error', 'Gagal membuat transaksi');
         }
 
-            //hapus session keranjang belanja 
+        // hapus session keranjang belanja 
         $this->cart->destroy();
         return redirect()->to(base_url());
     }
@@ -233,6 +264,4 @@ class TransaksiController extends BaseController
 
         return view('v_history', $data);
     }
-
-
 }
