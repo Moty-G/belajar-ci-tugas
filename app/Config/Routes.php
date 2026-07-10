@@ -43,3 +43,24 @@ $routes->get('ajax/costs','TransaksiController::costs', ['filter' => 'auth']);
 $routes->resource('api/products', ['controller' => 'Api\ProdukController']);
 
 $routes->get('api/transactions', 'Api\TransaksiController::index');
+
+// API Discount (Soal 6)
+$routes->get('api/discounts', 'Api\Discount::index');
+$routes->get('api/discounts/(:num)', 'Api\Discount::show/$1');
+$routes->post('api/discounts', 'Api\Discount::create');
+$routes->put('api/discounts/(:num)', 'Api\Discount::update/$1');
+$routes->delete('api/discounts/(:num)', 'Api\Discount::delete/$1');
+
+// Admin: Diskon (Soal 3)
+$routes->group('diskon', ['filter' => 'admin_role'], function ($routes) {
+    $routes->get('/', 'Diskon::index');
+    $routes->post('store', 'Diskon::store');
+    $routes->post('update/(:num)', 'Diskon::update/$1');
+    $routes->get('delete/(:num)', 'Diskon::delete/$1');
+});
+
+// Admin: Pembelian (Soal 5)
+$routes->group('pembelian', ['filter' => 'admin_role'], function ($routes) {
+    $routes->get('/', 'Pembelian::index');
+    $routes->post('status/(:num)', 'Pembelian::updateStatus/$1');
+});
