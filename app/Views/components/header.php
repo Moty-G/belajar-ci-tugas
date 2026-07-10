@@ -23,10 +23,11 @@
         <li class="nav-item">
           <span class="badge bg-success fs-6 me-2">
             <i class="bi bi-tag-fill"></i>
-            Diskon Hari Ini: <?= number_to_currency(session()->get('active_discount'), 'IDR') ?> / item
+            Diskon Hari Ini: Rp <?= number_format(session()->get('active_discount'), 0, ',', '.') ?> / item
           </span>
         </li>
         <?php endif; ?>
+
 
         <li class="nav-item d-block d-lg-none">
           <a class="nav-link nav-icon search-bar-toggle " href="#">
