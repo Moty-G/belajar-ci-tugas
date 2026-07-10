@@ -27,10 +27,25 @@
           <span>Product</span>
         </a>
       </li><!-- End Produk Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link <?php echo (strpos(uri_string(), 'diskon') === 0) ? "" : "collapsed" ?>" href="diskon">
+          <i class="bi bi-tag-fill"></i>
+          <span>Diskon</span>
+        </a>
+      </li><!-- End Diskon Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link <?php echo (strpos(uri_string(), 'pembelian') === 0) ? "" : "collapsed" ?>" href="pembelian">
+          <i class="bi bi-bag-check-fill"></i>
+          <span>Pembelian</span>
+        </a>
+      </li><!-- End Pembelian Nav -->
       
       <?php
       }
       ?>
+
 
       <li class="nav-item">
           <a class="nav-link <?php echo (uri_string() == 'history') ? "" : "collapsed" ?>" href="history">
